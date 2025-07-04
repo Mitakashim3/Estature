@@ -8,9 +8,11 @@ import Image from "next/image"
 interface SignupModalProps {
   open: boolean
   onClose: () => void
+  onSuccess?: (user: any) => void
+  allowedRoles?: ("buyer" | "seller")[]
 }
 
-const SignupModal = ({ open, onClose }: SignupModalProps) => {
+const SignupModal = ({ open, onClose, onSuccess, allowedRoles = ["buyer", "seller"] }: SignupModalProps) => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -19,6 +21,7 @@ const SignupModal = ({ open, onClose }: SignupModalProps) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [role, setRole] = useState(allowedRoles[0]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,16 +45,21 @@ const SignupModal = ({ open, onClose }: SignupModalProps) => {
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, role }),
       })
 
       if (res.ok) {
+        if (onSuccess) {
+          const user = await res.json();
+          onSuccess(user);
+        }
         onClose()
         // Reset form
         setName("")
         setEmail("")
         setPassword("")
         setConfirmPassword("")
+        setRole(allowedRoles[0])
       } else {
         const data = await res.json()
         setError(data.error || "Signup failed")
@@ -183,6 +191,23 @@ const SignupModal = ({ open, onClose }: SignupModalProps) => {
                 {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+          </div>
+
+          {/* Role Field */}
+          <div className="space-y-2">
+            <label className="text-white/90 text-sm font-medium">Role</label>
+            <select
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
+              value={role}
+              onChange={e => setRole(e.target.value as "buyer" | "seller")}
+              required
+            >
+              {allowedRoles.map(r => (
+                <option key={r} value={r}>
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Error Message */}

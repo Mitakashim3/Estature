@@ -4,18 +4,21 @@ import type React from "react"
 import { useState } from "react"
 import { X, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 interface LoginModalProps {
   open: boolean
   onClose: () => void
+  onSuccess?: (user: any) => void
 }
 
-const LoginModal = ({ open, onClose }: LoginModalProps) => {
+const LoginModal = ({ open, onClose, onSuccess }: LoginModalProps) => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,8 +33,15 @@ const LoginModal = ({ open, onClose }: LoginModalProps) => {
       })
 
       if (res.ok) {
+        const user = await res.json()
+        if (onSuccess) onSuccess(user)
+        // Route based on role
+        if (user.role === "buyer") {
+          router.push("/buyers")
+        } else if (user.role === "seller") {
+          router.push("/sellers")
+        }
         onClose()
-        // Reset form
         setEmail("")
         setPassword("")
       } else {

@@ -40,6 +40,9 @@ export default function Navbar({
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
+  // Map 'buyer' and 'seller' to 'client' for display
+  const mappedRole = userRole === "buyer" || userRole === "seller" ? "client" : userRole;
+
   const renderAuthSection = () => {
     if (isLoggedIn) {
       return (
@@ -154,9 +157,9 @@ export default function Navbar({
                     <div className="flex items-center space-x-2 text-white/90 px-4">
                       <User className="w-4 h-4" />
                       <span className="font-medium">{userName}</span>
-                      {userRole && (
+                      {mappedRole && (
                         <span className="px-3 py-1 text-xs rounded-full bg-white/20 backdrop-blur-sm text-white font-medium border border-white/30">
-                          {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                          {mappedRole.charAt(0).toUpperCase() + mappedRole.slice(1)}
                         </span>
                       )}
                     </div>
@@ -191,3 +194,4 @@ export default function Navbar({
       </div>
     </nav>
   )
+}

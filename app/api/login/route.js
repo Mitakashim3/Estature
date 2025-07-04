@@ -16,7 +16,11 @@ export async function POST(req) {
     if (!user) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
-    return NextResponse.json({ email: user.email, name: user.name });
+    // Return role as well for routing
+    return NextResponse.json({ email: user.email, name: user.name, role: user.role });
+  } catch (err) {
+    console.error("Login API error:", err);
+    return NextResponse.json({ error: "Internal server error", details: err?.message }, { status: 500 });
   } finally {
     await client.close();
   }
